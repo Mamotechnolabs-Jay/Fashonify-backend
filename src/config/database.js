@@ -1,6 +1,5 @@
 const { Sequelize } = require('sequelize');
 
-// Connection pool settings optimized for serverless
 const sequelize = new Sequelize(
   process.env.DB_NAME, 
   process.env.DB_USER, 
@@ -12,30 +11,19 @@ const sequelize = new Sequelize(
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false
+        rejectUnauthorized: false // You can set this to true if you have a valid SSL certificate
       }
     },
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
-      max: 2,      // Reduced for serverless environment
+      max: 2,
       min: 0,
       acquire: 30000,
-      idle: 5000    // Reduced idle time for serverless
+      idle: 5000
     },
     define: {
       timestamps: true,
       underscored: true
-    },
-    retry: {
-      match: [
-        /SequelizeConnectionError/,
-        /SequelizeConnectionRefusedError/,
-        /SequelizeHostNotFoundError/,
-        /SequelizeHostNotReachableError/,
-        /SequelizeInvalidConnectionError/,
-        /SequelizeConnectionTimedOutError/
-      ],
-      max: 3
     }
   }
 );

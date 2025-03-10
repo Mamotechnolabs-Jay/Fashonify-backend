@@ -6,13 +6,29 @@ const path = require('path');
 const session = require('express-session');
 const passport = require('passport');
 require('dotenv').config();
+require('./src/config/passport.config');
 
-// Create Express app
+// Database Connection
+const sequelize = require('./src/config/database');
+
+// Routes
+const authRoutes = require('./src/routes/auth.routes');
+const userProfileRoutes = require('./src/routes/userProfile.routes');
+const photoAnalysisRoutes = require('./src/routes/photoAnalysis.routes');
+const productRoutes = require('./src/routes/product.routes');
+const categoryRoutes = require('./src/routes/category.routes');
+const brandRoutes = require('./src/routes/brand.routes');
+const favoriteRoutes = require('./src/routes/favorite.routes');
+
+// Middleware
+const errorHandler = require('./src/middlewares/error-handler.middleware');
+const logger = require('./src/utils/logger.utils');
+
 const app = express();
 
 // Middleware Configuration
 app.use(cors({
-  origin: '*', // Allow all origins during development
+  origin: ['http://localhost:3000', 'http://localhost:8080'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -35,6 +51,18 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Serve static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/user-profiles', userProfileRoutes);
+app.use('/api/photo-analysis', photoAnalysisRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/brands', brandRoutes);
+app.use('/api/favorites', favoriteRoutes)
+
 // Root route for testing
 app.get('/', (req, res) => {
   res.json({
@@ -52,61 +80,10 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
-
-// Lazy-load dependencies to reduce cold start time
-let dbInitialized = false;
-
-const initializeApp = async (req, res, next) => {
-  // Skip initialization if already done
-  if (dbInitialized) {
-    return next();
-  }
-
-  try {
-    // Load passport config
-    require('./src/config/passport.config');
-
-    // Database Connection
-    const sequelize = require('./src/config/database');
-    await sequelize.authenticate();
-    console.log('Database connected successfully');
-    
-    // Mark as initialized
-    dbInitialized = true;
-    next();
-  } catch (error) {
-    console.error('Failed to initialize app:', error);
-    return res.status(500).json({
-      error: 'Could not connect to database',
-      message: 'Server initialization failed'
-    });
-  }
-};
-
-// Apply initialization middleware only to API routes
-app.use('/api', initializeApp);
-
-// Routes - only load after middleware
-app.use('/api/auth', require('./src/routes/auth.routes'));
-app.use('/api/user-profiles', require('./src/routes/userProfile.routes'));
-app.use('/api/photo-analysis', require('./src/routes/photoAnalysis.routes'));
-app.use('/api/products', require('./src/routes/product.routes'));
-app.use('/api/categories', require('./src/routes/category.routes'));
-app.use('/api/brands', require('./src/routes/brand.routes'));
-app.use('/api/favorites', require('./src/routes/favorite.routes'));
-
-// Serve static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Error handler middleware
-const errorHandler = require('./src/middlewares/error-handler.middleware');
+// Global Error Handler
 app.use(errorHandler);
 
-// 404 Handler - must be after all other routes
+// 404 Handler
 app.use((req, res) => {
   res.status(404).json({
     message: 'Endpoint Not Found',
@@ -114,15 +91,29 @@ app.use((req, res) => {
   });
 });
 
-// Server Configuration for local development
+// Server Configuration
 const PORT = process.env.PORT || 4000;
 
-// Only start server in local development mode
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
+// Start Server
+const startServer = async () => {
+  try {
+    // Database Connection
+    await sequelize.authenticate();
+    console.log('Database connected successfully');
 
-// Export the Express app for serverless deployment
+    // Sync Models (remove force: true to prevent data loss)
+    await sequelize.sync();
+
+    // Start Express Server
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Server startup failed:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
+
 module.exports = app;
