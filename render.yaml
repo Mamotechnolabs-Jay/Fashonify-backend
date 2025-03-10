@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: your-app-name
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # Add references to your environment variables from the dashboard
+      - key: DB_HOST
+        fromDatabase:
+          name: your-db-name
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: your-db-name
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: your-db-name
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: your-db-name
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: your-db-name
+          property: password
+      # Add your other environment variables
+      - key: JWT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+
+databases:
+  - name: your-db-name
+    databaseName: your-database-name
+    user: your-database-user
+    plan: free

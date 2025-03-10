@@ -74,8 +74,7 @@ app.get('/', (req, res) => {
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
-    // Test database connection on health check
-    await sequelize.authenticate({ timeout: 5000 });
+    await sequelize.authenticate();
     res.json({ status: 'ok', database: 'connected' });
   } catch (error) {
     res.status(503).json({ 
@@ -109,17 +108,33 @@ app.use((req, res) => {
 // Server Configuration
 const PORT = process.env.PORT || 4000;
 
-// Start Server - DON'T wait for DB connection or sync models in serverless
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Start Server
+const startServer = async () => {
+  try {
+    console.log('Starting server...');
+    console.log('Connecting to database...');
     
-    // Test database connection (only for local development)
-    sequelize.authenticate()
-      .then(() => console.log('Database connected successfully'))
-      .catch(err => console.error('Database connection error:', err));
-  });
-}
+    // Database Connection
+    await sequelize.authenticate();
+    console.log('Database connected successfully');
 
-// Export the Express app for serverless deployment
-module.exports = app;
+    // Sync Models - but don't use force: true in production
+    await sequelize.sync({ force: false });
+    console.log('Models synchronized');
+
+    // Start Express Server
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Server startup failed:', error);
+    // Don't exit process in production, let it retry
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
+  }
+};
+
+startServer();
+
+// We don't need to export the app for Render (only needed for serverless)

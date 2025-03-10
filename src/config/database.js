@@ -1,6 +1,5 @@
 const { Sequelize } = require('sequelize');
 
-// Connection pool settings optimized for serverless
 const sequelize = new Sequelize(
   process.env.DB_NAME, 
   process.env.DB_USER, 
@@ -13,23 +12,14 @@ const sequelize = new Sequelize(
       ssl: {
         require: true,
         rejectUnauthorized: false
-      },
-      // Optimize connection settings
-      connectTimeout: 5000 // 5 seconds
+      }
     },
-    logging: false, // Disable logging for better performance
+    logging: false,
     pool: {
-      max: 2,
+      max: 5,
       min: 0,
-      acquire: 8000, // 8 seconds timeout
-      idle: 3000
-    },
-    define: {
-      timestamps: true,
-      underscored: true
-    },
-    retry: {
-      max: 1 // Only try to connect once
+      acquire: 30000,
+      idle: 10000
     }
   }
 );
