@@ -118,8 +118,8 @@ const startServer = async () => {
     await sequelize.authenticate();
     console.log('Database connected successfully');
 
-    // Sync Models - but don't use force: true in production
-    await sequelize.sync({ force: false });
+    // Sync Models - use alter to update schema without dropping tables
+    await sequelize.sync({ alter: true });
     console.log('Models synchronized');
 
     // Start Express Server
@@ -128,13 +128,11 @@ const startServer = async () => {
     });
   } catch (error) {
     console.error('Server startup failed:', error);
-    // Don't exit process in production, let it retry
-    if (process.env.NODE_ENV !== 'production') {
-      process.exit(1);
-    }
+    process.exit(1);
   }
 };
 
 startServer();
 
-// We don't need to export the app for Render (only needed for serverless)
+// Export the Express app for serverless deployment
+module.exports = app;
