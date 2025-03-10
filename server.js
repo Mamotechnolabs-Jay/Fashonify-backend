@@ -54,19 +54,11 @@ app.use(passport.session());
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/user-profiles', userProfileRoutes);
-app.use('/api/photo-analysis', photoAnalysisRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/brands', brandRoutes);
-app.use('/api/favorites', favoriteRoutes)
-
 // Root route for testing
 app.get('/', (req, res) => {
+  console.log('Root route accessed');
   res.json({
-    message: 'Welcome to the Fashionify API',
+    message: 'Hello World',
     status: 'online',
     endpoints: {
       auth: '/api/auth',
@@ -79,6 +71,15 @@ app.get('/', (req, res) => {
     }
   });
 });
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/user-profiles', userProfileRoutes);
+app.use('/api/photo-analysis', photoAnalysisRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/brands', brandRoutes);
+app.use('/api/favorites', favoriteRoutes);
 
 // Global Error Handler
 app.use(errorHandler);
@@ -97,6 +98,16 @@ const PORT = process.env.PORT || 4000;
 // Start Server
 const startServer = async () => {
   try {
+    console.log('Starting server...');
+    console.log('Connecting to database...');
+    console.log('Database config:', {
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      name: process.env.DB_NAME,
+      user: process.env.DB_USER,
+      sslmode: process.env.DB_SSLMODE
+    });
+
     // Database Connection
     await sequelize.authenticate();
     console.log('Database connected successfully');
@@ -105,9 +116,11 @@ const startServer = async () => {
     await sequelize.sync();
 
     // Start Express Server
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+    if (process.env.NODE_ENV !== 'production') {
+      app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+      });
+    }
   } catch (error) {
     console.error('Server startup failed:', error);
     process.exit(1);
@@ -116,4 +129,5 @@ const startServer = async () => {
 
 startServer();
 
+// Export the Express app for serverless deployment
 module.exports = app;
