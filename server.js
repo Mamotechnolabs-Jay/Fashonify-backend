@@ -61,7 +61,24 @@ app.use('/api/photo-analysis', photoAnalysisRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/brands', brandRoutes);
-app.use('/api/favorites',favoriteRoutes)
+app.use('/api/favorites', favoriteRoutes)
+
+// Root route for testing
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to the Fashionify API',
+    status: 'online',
+    endpoints: {
+      auth: '/api/auth',
+      userProfiles: '/api/user-profiles',
+      photoAnalysis: '/api/photo-analysis',
+      products: '/api/products',
+      categories: '/api/categories',
+      brands: '/api/brands',
+      favorites: '/api/favorites'
+    }
+  });
+});
 
 // Global Error Handler
 app.use(errorHandler);
