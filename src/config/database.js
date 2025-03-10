@@ -26,7 +26,6 @@ const sequelize = new Sequelize(
       timestamps: true,
       underscored: true
     },
-    // Important for serverless to avoid connection timeouts
     retry: {
       match: [
         /SequelizeConnectionError/,
