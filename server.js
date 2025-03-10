@@ -56,7 +56,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Root route for testing
 app.get('/', (req, res) => {
-  console.log('Root route accessed');
   res.json({
     message: 'Hello World',
     status: 'online',
@@ -73,8 +72,18 @@ app.get('/', (req, res) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+app.get('/health', async (req, res) => {
+  try {
+    // Test database connection on health check
+    await sequelize.authenticate({ timeout: 5000 });
+    res.json({ status: 'ok', database: 'connected' });
+  } catch (error) {
+    res.status(503).json({ 
+      status: 'error', 
+      database: 'disconnected',
+      message: error.message
+    });
+  }
 });
 
 // Routes
@@ -100,39 +109,17 @@ app.use((req, res) => {
 // Server Configuration
 const PORT = process.env.PORT || 4000;
 
-// Start Server
-const startServer = async () => {
-  try {
-    console.log('Starting server...');
-    console.log('Connecting to database...');
-    console.log('Database config:', {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      name: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      sslmode: process.env.DB_SSLMODE
-    });
-
-    // Database Connection
-    await sequelize.authenticate();
-    console.log('Database connected successfully');
-
-    // Sync Models (remove force: true to prevent data loss)
-    await sequelize.sync();
-
-    // Start Express Server
-    if (process.env.NODE_ENV !== 'production') {
-      app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-      });
-    }
-  } catch (error) {
-    console.error('Server startup failed:', error);
-    process.exit(1);
-  }
-};
-
-startServer();
+// Start Server - DON'T wait for DB connection or sync models in serverless
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    
+    // Test database connection (only for local development)
+    sequelize.authenticate()
+      .then(() => console.log('Database connected successfully'))
+      .catch(err => console.error('Database connection error:', err));
+  });
+}
 
 // Export the Express app for serverless deployment
 module.exports = app;

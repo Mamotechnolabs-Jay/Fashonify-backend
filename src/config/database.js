@@ -13,29 +13,23 @@ const sequelize = new Sequelize(
       ssl: {
         require: true,
         rejectUnauthorized: false
-      }
+      },
+      // Optimize connection settings
+      connectTimeout: 5000 // 5 seconds
     },
-    logging: process.env.NODE_ENV === 'development' ? console.log : false,
+    logging: false, // Disable logging for better performance
     pool: {
-      max: 2,      // Reduced for serverless environment
+      max: 2,
       min: 0,
-      acquire: 30000,
-      idle: 5000    // Reduced idle time for serverless
+      acquire: 8000, // 8 seconds timeout
+      idle: 3000
     },
     define: {
       timestamps: true,
       underscored: true
     },
     retry: {
-      match: [
-        /SequelizeConnectionError/,
-        /SequelizeConnectionRefusedError/,
-        /SequelizeHostNotFoundError/,
-        /SequelizeHostNotReachableError/,
-        /SequelizeInvalidConnectionError/,
-        /SequelizeConnectionTimedOutError/
-      ],
-      max: 3
+      max: 1 // Only try to connect once
     }
   }
 );
