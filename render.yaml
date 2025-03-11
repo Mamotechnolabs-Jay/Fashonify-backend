@@ -9,7 +9,7 @@ services:
         value: production
       - key: PORT
         value: 10000
-      # Add references to your environment variables from the dashboard
+      # Database Configuration
       - key: DB_HOST
         fromDatabase:
           name: your-db-name
@@ -30,11 +30,39 @@ services:
         fromDatabase:
           name: your-db-name
           property: password
-      # Add your other environment variables
+      - key: DB_SSLMODE
+        value: require
+      # Authentication
       - key: JWT_SECRET
-        sync: false
-      - key: SESSION_SECRET
-        sync: false
+        value: 6598147623
+      - key: JWT_EXPIRATION
+        value: 1h
+      # Verification Services
+      - key: SMS_PROVIDER_SID
+        value: ACe2f5e3a4f51229af899aa5c909ac2b64
+      - key: SMS_PROVIDER_TOKEN
+        value: d99ec1428ce4476c118d7a3a5ff1c92d
+      - key: SMS_PROVIDER_PHONE
+        value: +923040448017
+      # Email Configuration
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_USER
+        value: ranaadeel49@gmail.com
+      - key: EMAIL_PASS
+        value: asgg tgjm hjvv tjky
+      # Google OAuth
+      - key: GOOGLE_CLIENT_ID
+        value: 610225118681-52jmkpkovt57cm4lot27hc9solntv4e5.apps.googleusercontent.com
+      - key: GOOGLE_CLIENT_SECRET
+        value: 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
+      # Facebook OAuth
+      - key: FACEBOOK_APP_ID
+        value: your_facebook_app_id
+      - key: FACEBOOK_APP_SECRET
+        value: your_facebook_app_secret
 
 databases:
   - name: your-db-name
