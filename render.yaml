@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: your-app-name
+    name: fashonify-backend  # Update with your actual service name
     env: node
     buildCommand: npm install
     startCommand: node server.js
@@ -9,35 +9,70 @@ services:
         value: production
       - key: PORT
         value: 10000
-      # Add references to your environment variables from the dashboard
+      # Database Configuration
       - key: DB_HOST
         fromDatabase:
-          name: your-db-name
+          name: fashonify-db  # Update with your actual database name
           property: host
       - key: DB_PORT
         fromDatabase:
-          name: your-db-name
+          name: fashonify-db
           property: port
       - key: DB_NAME
         fromDatabase:
-          name: your-db-name
+          name: fashonify-db
           property: database
       - key: DB_USER
         fromDatabase:
-          name: your-db-name
+          name: fashonify-db
           property: user
       - key: DB_PASSWORD
         fromDatabase:
-          name: your-db-name
+          name: fashonify-db
           property: password
-      # Add your other environment variables
+      - key: DB_SSLMODE
+        value: require
+      
+      # Authentication
       - key: JWT_SECRET
         sync: false
+      - key: JWT_EXPIRATION
+        value: 1h
       - key: SESSION_SECRET
+        sync: false
+        
+      # Verification Services
+      - key: SMS_PROVIDER_SID
+        sync: false
+      - key: SMS_PROVIDER_TOKEN
+        sync: false
+      - key: SMS_PROVIDER_PHONE
+        sync: false
+        
+      # Email Configuration
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+        
+      # Google OAuth
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+        
+      # Facebook OAuth
+      - key: FACEBOOK_APP_ID
+        sync: false
+      - key: FACEBOOK_APP_SECRET
         sync: false
 
 databases:
-  - name: your-db-name
-    databaseName: your-database-name
-    user: your-database-user
+  - name: fashonify-db  # Update with your actual database name
+    databaseName: fashonify
+    user: fashonify_user
     plan: free
