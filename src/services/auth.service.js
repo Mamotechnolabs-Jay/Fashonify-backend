@@ -85,24 +85,26 @@ class AuthService {
   }
 
   // Verify User
-  static async verifyUser(email, verificationCode) {
-    const user = await User.findOne({ 
-      where: { 
-        email,
-        verificationCode 
-      } 
-    });
+  static async verifyUser(emailOrPhone, verificationCode) {
+    let user;
+    if (emailOrPhone.includes('@')) {
+      // Verify by email
+      user = await User.findOne({ where: { email: emailOrPhone, verificationCode } });
+    } else {
+      // Verify by phone
+      user = await User.findOne({ where: { phone: emailOrPhone, verificationCode } });
+    }
 
     if (!user) {
-      throw new Error('Invalid verification code');
+      throw new Error('Invalid verification code or user not found');
     }
 
     user.isVerified = true;
-    user.verificationCode = null;
+    user.verificationCode = null; // Clear the verification code
     await user.save();
 
-    // Generate token
-    const token = JWTUtil.generateToken(user);
+    // Generate a token (assuming you have a method for this)
+    const token = generateToken(user);
 
     return { token, user };
   }

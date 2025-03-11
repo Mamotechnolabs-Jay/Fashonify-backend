@@ -31,6 +31,8 @@ class AuthController {
       const { userId, verificationMethod } = req.body;
       const user = await AuthService.signupStep2(userId, verificationMethod);
 
+      console.log('User:', user);
+
       res.status(200).json({
         success: true,
         message: `Verification code sent via ${verificationMethod}.`,
@@ -72,8 +74,8 @@ class AuthController {
   // Verify User Handler
   static async verifyUser(req, res) {
     try {
-      const { email, verificationCode } = req.body;
-      const result = await AuthService.verifyUser(email, verificationCode);
+      const { emailOrPhone, verificationCode } = req.body;
+      const result = await AuthService.verifyUser(emailOrPhone, verificationCode);
 
       res.status(200).json({
         message: 'User verified successfully',

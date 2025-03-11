@@ -134,5 +134,4 @@ const startServer = async () => {
 
 startServer();
 
-// Export the Express app for serverless deployment
 module.exports = app;
