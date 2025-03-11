@@ -104,7 +104,7 @@ class AuthService {
     await user.save();
 
     // Generate a token (assuming you have a method for this)
-    const token = generateToken(user);
+    const token = JWTUtil.generateToken(user);
 
     return { token, user };
   }
