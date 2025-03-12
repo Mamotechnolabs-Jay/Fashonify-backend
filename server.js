@@ -19,6 +19,7 @@ const productRoutes = require('./src/routes/product.routes');
 const categoryRoutes = require('./src/routes/category.routes');
 const brandRoutes = require('./src/routes/brand.routes');
 const favoriteRoutes = require('./src/routes/favorite.routes');
+const changeAuthRoutes = require('./src/routes/changeAuth.routes');
 
 // Middleware
 const errorHandler = require('./src/middlewares/error-handler.middleware');
@@ -93,6 +94,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/change-auth', changeAuthRoutes);
 
 // Global Error Handler
 app.use(errorHandler);
